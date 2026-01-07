@@ -1,0 +1,35 @@
+# LiteLLM Configuration File
+# This file configures LiteLLM proxy settings
+
+model_list:
+  # Example: OpenAI models
+  # - model_name: gpt-4
+  #   litellm_params:
+  #     model: gpt-4
+  #     api_key: os.environ/OPENAI_API_KEY
+  
+  # Example: Anthropic models
+  # - model_name: claude-3-opus
+  #   litellm_params:
+  #     model: claude-3-opus-20240229
+  #     api_key: os.environ/ANTHROPIC_API_KEY
+  
+  # Example: Google models
+  # - model_name: gemini-pro
+  #   litellm_params:
+  #     model: gemini/gemini-pro
+  #     api_key: os.environ/GOOGLE_API_KEY
+
+# General settings
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: null  # Optional: for storing request logs
+  max_budget: null  # Optional: rate limiting budget
+
+# Langfuse integration (configured via environment variables)
+# LANGFUSE_SECRET_KEY and LANGFUSE_PUBLIC_KEY should be set in environment
+
+# Logging
+litellm_settings:
+  set_verbose: true
+  success_callback: ["langfuse"]  # Enable Langfuse callback

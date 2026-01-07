@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for Temporal
+  postgres:
+    image: postgres:15-alpine
+    container_name: temporal-postgres
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - temporal
+
+  # Temporal Server (Auto-setup includes all services: Frontend, History, Matching, Worker)
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: temporal
+      POSTGRES_SEEDS: postgres
+      SKIP_DB_CREATE: "false"
+      SKIP_DB_SETUP: "false"
+      SKIP_DEFAULT_NAMESPACE_CREATION: "false"
+      
+      # Bind address for services
+      BIND_ON_IP: 0.0.0.0
+      
+      # Ports configuration
+      # Frontend Service: 7233 (gRPC), 6933 (membership)
+      # History Service: 7234 (gRPC), 6934 (membership)
+      # Matching Service: 7235 (gRPC), 6935 (membership)
+      # Worker Service: 6939 (membership)
+    ports:
+      # Frontend Service
+      - "7233:7233"  # gRPC API
+      - "6933:6933"  # Membership
+      # History Service
+      - "7234:7234"  # gRPC API
+      - "6934:6934"  # Membership
+      # Matching Service
+      - "7235:7235"  # gRPC API
+      - "6935:6935"  # Membership
+      # Worker Service
+      - "6939:6939"  # Membership
+    volumes:
+      - temporal_data:/var/lib/temporal
+    networks:
+      - temporal
+    restart: unless-stopped
+
+  # Temporal Web UI
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: temporal-ui
+    depends_on:
+      - temporal
+    environment:
+      # Connect to Temporal Server
+      TEMPORAL_ADDRESS: temporal:7233
+      # UI Configuration
+      TEMPORAL_CORS_ORIGINS: http://localhost:8080
+      TEMPORAL_AUTH_ENABLED: "false"
+    ports:
+      - "8080:8080"
+    networks:
+      - temporal
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  temporal_data:
+    driver: local
+
+networks:
+  temporal:
+    driver: bridge
