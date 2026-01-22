@@ -1,3 +1,14 @@
 .env
 .vscode
 .idea
+.venv
+
+# Agent configuration files (contains sensitive API keys)
+agent/config.yaml
+agent/config.yml
+agent/.env
+
+# Compiled binaries
+agent/bin/
+*.exe
+*.out

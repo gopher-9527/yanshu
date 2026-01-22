@@ -1,0 +1,43 @@
+# Yanshu Agent Configuration Template
+# Copy this file to config.yaml and fill in your actual values
+# DO NOT commit config.yaml to git (it's in .gitignore)
+
+# LLM Model Configuration
+model:
+  # Your API key for the LLM provider
+  # For DeepSeek: get from https://platform.deepseek.com
+  api_key: "your-api-key-here"
+  
+  # Model name to use
+  model_name: "deepseek/deepseek-v3.2-251201"
+  
+  # API base URL
+  base_url: "https://api.qnaigc.com"
+  
+  # Request timeout (optional, defaults to 5m)
+  # Examples: "30s", "2m", "5m"
+  timeout: "5m"
+
+# Agent Configuration
+agent:
+  name: "yanshu_agent"
+  description: "Tells the current time in a specified city."
+  instruction: "You are a helpful assistant that tells the current time in a city."
+
+# Logging Configuration
+logging:
+  # Log level: debug, info, warn, error
+  level: "debug"
+  
+  # Add source location (file:line) to logs
+  add_source: true
+
+# Server Configuration (for web mode)
+server:
+  # Port for web server
+  port: 8080
+  
+  # Timeouts
+  read_timeout: "15s"
+  write_timeout: "15s"
+  idle_timeout: "60s"
