@@ -1,0 +1,33 @@
+# 依赖
+node_modules
+.pnpm-store
+dist
+
+# 构建产物
+*.log
+.DS_Store
+
+# 环境文件
+.env
+.env.local
+.env.production
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# 测试
+coverage
+.nyc_output
+
+# 文档
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+.dockerignore

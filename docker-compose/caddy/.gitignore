@@ -1,0 +1,11 @@
+# 环境变量文件
+.env
+.env.local
+
+# 日志文件
+*.log
+logs/
+
+# Caddy 数据（如果需要本地开发）
+# caddy_data/
+# caddy_config/

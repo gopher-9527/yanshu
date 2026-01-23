@@ -85,7 +85,7 @@ func main() {
 	}
 
 	logger.Info("Starting launcher", "args", os.Args[1:])
-	
+
 	l := full.NewLauncher()
 	if err = l.Execute(ctx, launcherConfig, os.Args[1:]); err != nil {
 		log.Fatalf("Run failed: %v\n\n%s", err, l.CommandLineSyntax())

@@ -1,0 +1,31 @@
+# 开发环境 Dockerfile
+# 支持热重载和开发模式
+# Go 版本: 1.25.6 (最新稳定版，发布于 2026-01-15)
+# 更新版本: 访问 https://go.dev/dl/ 查看最新版本，更新下面的版本号
+
+FROM golang:1.25.6-alpine
+
+# 安装开发工具
+RUN apk add --no-cache git ca-certificates tzdata make
+
+# 安装 air（热重载工具，可选）
+RUN go install github.com/cosmtrek/air@latest
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制 go mod 文件
+COPY go.mod go.sum ./
+
+# 下载依赖
+RUN go mod download
+
+# 复制源代码
+COPY . .
+
+# 暴露端口
+EXPOSE 8080
+
+# 使用 air 进行热重载（需要 .air.toml 配置）
+# 或者直接使用 go run
+CMD ["go", "run", "./cmd/agent.go", "web", "api", "webui"]

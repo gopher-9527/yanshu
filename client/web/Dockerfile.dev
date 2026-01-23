@@ -1,0 +1,27 @@
+# 开发环境 Dockerfile
+# 支持热重载和开发模式
+# Node.js 版本: 24.12.0 LTS "Krypton" (最新 LTS 版本，发布于 2025-12-10)
+# 更新版本: 访问 https://nodejs.org/en/about/releases/ 查看最新 LTS 版本，更新下面的版本号
+
+FROM node:24.12.0-alpine
+
+# 安装 pnpm
+RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制包管理文件
+COPY package.json pnpm-lock.yaml* .npmrc ./
+
+# 安装依赖
+RUN pnpm install
+
+# 复制源代码
+COPY . .
+
+# 暴露 Vite 开发服务器端口
+EXPOSE 3000
+
+# 启动开发服务器
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]

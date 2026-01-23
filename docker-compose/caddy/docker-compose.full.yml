@@ -1,0 +1,86 @@
+version: '3.8'
+
+# 完整的 Yanshu 服务栈（包含 Caddy、前端、Agent）
+# 使用方式: docker-compose -f docker-compose.full.yml up -d
+
+services:
+  # Caddy 反向代理
+  caddy:
+    image: caddy:2.7-alpine
+    container_name: yanshu-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - yanshu-network
+    depends_on:
+      - web
+      - agent
+    environment:
+      - CADDY_ADMIN=0.0.0.0:2019
+
+  # 前端 Web 客户端
+  web:
+    build:
+      context: ../../client/web
+      dockerfile: Dockerfile
+    container_name: yanshu-web
+    restart: unless-stopped
+    networks:
+      - yanshu-network
+    environment:
+      - NODE_ENV=production
+    # 注意：生产构建时，VITE_* 变量需要在构建时设置
+    # 使用构建参数：
+    # build:
+    #   context: ../../client/web
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - VITE_API_URL=http://localhost/api
+    #     - VITE_AGENT_NAME=yanshu_agent
+
+  # Agent 服务
+  agent:
+    build:
+      context: ../../agent
+      dockerfile: Dockerfile
+    container_name: yanshu-agent
+    restart: unless-stopped
+    networks:
+      - yanshu-network
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - MODEL_NAME=${MODEL_NAME:-deepseek/deepseek-v3.2-251201}
+      - MODEL_BASE_URL=${MODEL_BASE_URL:-https://api.qnaigc.com}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - agent_config:/app/config.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    # 如果需要暴露 Agent 的原始端口（不推荐，应通过 Caddy）
+    # ports:
+    #   - "8080:8080"
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+  agent_config:
+    driver: local
+    # 注意：config.yaml 需要手动创建或通过环境变量配置
+
+networks:
+  yanshu-network:
+    driver: bridge

@@ -1,0 +1,39 @@
+version: '3.8'
+
+# 前端 Web 客户端 Docker Compose（开发/测试用）
+# 生产环境建议使用 docker-compose/caddy/docker-compose.full.yml
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yanshu-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - yanshu-network
+
+  # 开发模式（使用 Dockerfile.dev）
+  # web-dev:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   container_name: yanshu-web-dev
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - VITE_API_URL=http://localhost:8080/api
+  #     - VITE_AGENT_NAME=yanshu_agent
+  #   networks:
+  #     - yanshu-network
+
+networks:
+  yanshu-network:
+    driver: bridge

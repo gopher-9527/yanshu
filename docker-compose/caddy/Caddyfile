@@ -1,0 +1,99 @@
+# Yanshu Caddy 配置
+# 用于反向代理前端和 Agent 服务
+
+# 本地开发配置（HTTP）
+localhost {
+    # 前端 Web 客户端
+    handle / {
+        reverse_proxy web:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Agent API 服务
+    handle /api/* {
+        reverse_proxy agent:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # WebSocket 支持（如果 Agent 使用 WebSocket）
+    handle /ws/* {
+        reverse_proxy agent:8080 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {remote}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # 日志
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+# 生产环境配置（HTTPS + 域名）
+# 取消注释并替换域名后使用
+# example.com {
+#     # 自动 HTTPS
+#     tls {
+#         dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+#         # 或使用其他 DNS 提供商
+#     }
+#
+#     # 前端 Web 客户端
+#     handle / {
+#         reverse_proxy web:3000 {
+#             header_up Host {host}
+#             header_up X-Real-IP {remote}
+#             header_up X-Forwarded-For {remote}
+#             header_up X-Forwarded-Proto {scheme}
+#         }
+#     }
+#
+#     # Agent API 服务
+#     handle /api/* {
+#         reverse_proxy agent:8080 {
+#             header_up Host {host}
+#             header_up X-Real-IP {remote}
+#             header_up X-Forwarded-For {remote}
+#             header_up X-Forwarded-Proto {scheme}
+#         }
+#     }
+#
+#     # WebSocket 支持
+#     handle /ws/* {
+#         reverse_proxy agent:8080 {
+#             header_up Host {host}
+#             header_up X-Real-IP {remote}
+#             header_up X-Forwarded-For {remote}
+#             header_up X-Forwarded-Proto {scheme}
+#         }
+#     }
+#
+#     # 安全头
+#     header {
+#         # 启用 HSTS
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         # XSS 保护
+#         X-Content-Type-Options "nosniff"
+#         # 防止点击劫持
+#         X-Frame-Options "DENY"
+#         # CSP（根据需求调整）
+#         Content-Security-Policy "default-src 'self'"
+#     }
+#
+#     # 日志
+#     log {
+#         output file /var/log/caddy/access.log
+#         format json
+#     }
+# }

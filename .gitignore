@@ -12,3 +12,7 @@ agent/.env
 agent/bin/
 *.exe
 *.out
+
+# pnpm
+client/web/.pnpm-store
+client/web/pnpm-lock.yaml
